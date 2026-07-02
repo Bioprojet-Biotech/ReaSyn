@@ -37,10 +37,26 @@ Find the Model Card++ for ReaSyn [here](model_card/overview.md).
 
 ## Installation
 
-Run the following command to install dependencies:
+Install [uv](https://docs.astral.sh/uv/), then run:
 ```bash
-conda env create -f env.yml
-conda activate reasyn
+uv sync
+```
+
+This creates a virtual environment in `.venv` and installs all dependencies from `uv.lock`.
+
+To include development tools (formatters, linters, tests):
+```bash
+uv sync --group dev
+```
+
+Activate the environment when needed:
+```bash
+source .venv/bin/activate
+```
+
+Or run commands directly with `uv run`, for example:
+```bash
+uv run python scripts/preprocess.py --model-config configs/train.yml
 ```
 
 ## Data Preparation
@@ -67,6 +83,14 @@ cd ..
 ```
 Then, download the [preprocessed data](https://huggingface.co/whgao/synformer). Place `fpindex.pkl` and `matrix.pkl` in the folder `data/processed/comp_2048`.<br>
 Then, run the following command:
+```bash
+# With uv: use the venv python directly so uv does not re-sync scikit-learn back to 1.2.2
+uv pip install scikit-learn==1.6.0
+.venv/bin/python scripts/convert_processed_1.py
+uv pip install scikit-learn==1.2.2
+.venv/bin/python scripts/convert_processed_2.py
+```
+Or with pip:
 ```bash
 python scripts/convert_processed_1.py
 pip install scikit-learn==1.2.2 # 1.2.2 is required for hit expansion later
@@ -134,6 +158,13 @@ python scripts/sample.py -m ${model_path} -i ${testset_path} -o ${output_path} -
 # python scripts/sample.py -m ${model_path} -i data/test_zinc250k.txt -o results/zinc250k.txt --num_cycles 16 --add_bb_path data/processed/zinc250k_2048/fpindex.pkl
 python scripts/eval_recon.py ${output_path}
 ```
+
+### Rendering pathways
+Render reaction diagrams (RDKit reaction drawing + HTML index) from a `sample.py` CSV:
+```bash
+uv run python scripts/render_pathways.py ${output_path} -o results/rendered --top-k 1
+```
+Open `results/rendered/index.html` in a browser, or inspect the PNG files directly.
 `model_path` is a comma-separated string of the AR and EB model paths, e.g., `data/trained_model/nv-reasyn-ar-166m-v2.ckpt,data/trained_model/nv-reasyn-eb-174b-v2.ckpt`.<br>
 We recommend using multiple GPUs for parallelized synthesizable molecule reconstruction.
 
