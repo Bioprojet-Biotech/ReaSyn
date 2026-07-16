@@ -181,7 +181,7 @@ def save_shard(shard, path, data_all):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--config', '-c', required=True)
-    parser.add_argument('--pretrained_path', '-m', type=str, default='data/trained_model/NV-ReaSyn-AR-166M-v2.ckpt')
+    parser.add_argument('--pretrained_path', '-m', type=str, default='checkpoints/nv-reasyn-ar-166m-v2.ckpt')
     parser.add_argument('--data_path', '-d', type=str, default='data/edit_bridge')
     parser.add_argument('--batch-size', '-b', type=int, default=8)
     parser.add_argument('--num-workers-per-gpu', type=int, default=32)  # number of processes

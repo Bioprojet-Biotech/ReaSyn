@@ -5,6 +5,8 @@ results
 *.tab
 oracle
 *.ckpt
+checkpoints/
+checkpoints
 tmp*
 data/edit_bridge
 data/processed/zinc250k_2048
