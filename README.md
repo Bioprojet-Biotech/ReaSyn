@@ -160,11 +160,21 @@ python scripts/eval_recon.py ${output_path}
 ```
 
 ### Rendering pathways
-Render reaction diagrams (RDKit reaction drawing + HTML index) from a `sample.py` CSV:
+Render reaction diagrams (RDKit reaction drawing + HTML index) from sampling results (CSV or Feather):
 ```bash
 uv run python scripts/render_pathways.py ${output_path} -o results/rendered --top-k 1
 ```
 Open `results/rendered/index.html` in a browser, or inspect the PNG files directly.
+
+### Pathway PDF reports
+Build a Reaxys-style PDF (overview page + one page per reaction step) from sampling results:
+```bash
+uv run python scripts/report_pathways.py ${output_path} -o results/report.pdf --top-k 1
+# uv run python scripts/report_pathways.py results/one.fth -o results/report.pdf --min-score 0.5
+# uv run python scripts/report_pathways.py results/one.csv -o results/report.pdf --indices 0,2
+# uv run python scripts/report_pathways.py results/one.csv -o results/report.pdf --all
+```
+
 `model_path` is a comma-separated string of the AR and EB model paths, e.g., `checkpoints/nv-reasyn-ar-166m-v2.ckpt,checkpoints/nv-reasyn-eb-174b-v2.ckpt`.<br>
 We recommend using multiple GPUs for parallelized synthesizable molecule reconstruction.
 

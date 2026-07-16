@@ -21,6 +21,7 @@ dependencies = [
     "pytorch-lightning==2.5.3",
     "pyyaml==6.0.2",
     "rdkit==2025.3.2",
+    "reportlab==4.4.3",
     "rotary-embedding-torch>=0.9.1",
     "scikit-learn==1.2.2",
     "setuptools>=65,<82",
