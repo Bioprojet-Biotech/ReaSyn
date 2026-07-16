@@ -44,6 +44,11 @@ TaskQueueType: TypeAlias = "mp.JoinableQueue[Molecule | None]"
 ResultQueueType: TypeAlias = "mp.Queue[tuple[Molecule, pd.DataFrame]]"
 
 
+def _model_column(model_path: pathlib.Path | list[pathlib.Path]) -> str:
+    paths = model_path if isinstance(model_path, list) else [model_path]
+    return ",".join(pathlib.Path(p).name for p in paths)
+
+
 class Worker(mp.Process):
     def __init__(
         self,
@@ -142,6 +147,7 @@ class Worker(mp.Process):
                             num_editflow_steps=self.num_editflow_steps)
             t_elapsed = time.time() - t_start
             df = sampler.get_dataframe()[: self._max_results]
+            df['model'] = _model_column(self._model_path)
             df['time'] = t_elapsed
             return df
             
@@ -417,5 +423,6 @@ def run_sampling_one(
                     num_editflow_steps=num_editflow_steps)
     t_elapsed = time.time() - t_start
     df = sampler.get_dataframe()[: max_results]
+    df['model'] = _model_column(model_path)
     df['time'] = t_elapsed
     return df
