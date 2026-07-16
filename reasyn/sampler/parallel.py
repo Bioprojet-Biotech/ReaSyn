@@ -230,7 +230,8 @@ def run_parallel_sampling(
     num_editflow_samples: int = 10,
     num_editflow_steps: int = 100,
     mols_to_filter = None,
-    filter_sim: float = 0.8
+    filter_sim: float = 0.8,
+    min_sim: float = 0.0,
 ) -> None:
     num_gpus = num_gpus if num_gpus > 0 else _count_gpus()
     
@@ -244,7 +245,8 @@ def run_parallel_sampling(
             "factor": search_width,
             "max_active_states": exhaustiveness,
             "mols_to_filter": mols_to_filter,
-            "filter_sim": filter_sim
+            "filter_sim": filter_sim,
+            "min_sim": min_sim,
         },
         time_limit=time_limit,
         add_bb_path=add_bb_path,
@@ -307,7 +309,8 @@ def run_parallel_sampling_return_smiles(
     num_editflow_samples: int = 10,
     num_editflow_steps: int = 100,
     mols_to_filter=None,
-    filter_sim: float = 0.8
+    filter_sim: float = 0.8,
+    min_sim: float = 0.0,
 ) -> None:
     num_gpus = num_gpus if num_gpus > 0 else _count_gpus()
     
@@ -321,7 +324,8 @@ def run_parallel_sampling_return_smiles(
             "factor": search_width,
             "max_active_states": exhaustiveness,
             "mols_to_filter": mols_to_filter,
-            "filter_sim": filter_sim
+            "filter_sim": filter_sim,
+            "min_sim": min_sim,
         },
         time_limit=time_limit,
         add_bb_path=add_bb_path,
@@ -364,7 +368,8 @@ def run_sampling_one(
     num_editflow_samples: int = 10,
     num_editflow_steps: int = 100,
     mols_to_filter=None,
-    filter_sim=0.8
+    filter_sim=0.8,
+    min_sim=0.0,
 ) -> pd.DataFrame:
 
     assert isinstance(model_path, list) and len(model_path) == 2
@@ -382,7 +387,8 @@ def run_sampling_one(
         "factor": search_width,
         "max_active_states": exhaustiveness,
         "mols_to_filter": mols_to_filter,
-        "filter_sim": filter_sim
+        "filter_sim": filter_sim,
+        "min_sim": min_sim,
     }
 
     _fpindex: FingerprintIndex = pickle.load(open(config.chem.fpindex, "rb"))

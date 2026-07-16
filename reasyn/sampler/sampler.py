@@ -49,7 +49,8 @@ class Sampler:
         max_active_states: int = 256,
         exact_break: bool = True,
         mols_to_filter=None,
-        filter_sim: float = 0.8
+        filter_sim: float = 0.8,
+        min_sim: float = 0.0,
     ) -> None:
         super().__init__()
         self._fpindex = fpindex
@@ -69,6 +70,7 @@ class Sampler:
         self.exact_break = exact_break
         self._mols_to_filter = mols_to_filter
         self._filter_sim = filter_sim
+        self._min_sim = min_sim
         
         # input filtering
         if self._mols_to_filter is not None and \
@@ -480,6 +482,8 @@ class Sampler:
             )
             smiles_to_mol[product.molecule.smiles] = product.molecule
         rows.sort(key=lambda r: r["score"], reverse=True)
+        if self._min_sim > 0:
+            rows = [row for row in rows if row["score"] >= self._min_sim]
         for row in rows[:num_calc_extra_metrics]:
             mol = smiles_to_mol[str(row["smiles"])]
             row["scf_sim"] = self._mol.scaffold.tanimoto_similarity(

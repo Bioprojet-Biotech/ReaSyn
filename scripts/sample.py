@@ -43,6 +43,7 @@ def _input_mols_option(p):
 @click.option("--num_editflow_steps", type=int, default=100)
 @click.option("--mols_to_filter", type=str, default=None)
 @click.option("--filter_sim", type=float, default=0.8)
+@click.option("--min_sim", type=float, default=0.0)
 def main(
     input: list[Molecule],
     output: pathlib.Path,
@@ -60,7 +61,8 @@ def main(
     num_editflow_samples: int,
     num_editflow_steps: int,
     mols_to_filter: str,
-    filter_sim: float
+    filter_sim: float,
+    min_sim: float,
 ):
     model_path = [pathlib.Path(path) for path in model_path.split(',')]
     assert all([path.exists() for path in model_path])
@@ -83,7 +85,8 @@ def main(
         num_editflow_steps=num_editflow_steps,
         mols_to_filter=_input_mols_option(mols_to_filter)
                        if mols_to_filter is not None else None,
-        filter_sim=filter_sim
+        filter_sim=filter_sim,
+        min_sim=min_sim,
     )
 
 
