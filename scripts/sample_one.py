@@ -32,7 +32,7 @@ def _input_mols_option(p):
 def save_dataframe(df: pd.DataFrame, output: pathlib.Path) -> None:
     output.parent.mkdir(parents=True, exist_ok=True)
     suffix = output.suffix.lower()
-    if suffix == ".feather":
+    if suffix in (".feather", ".fth"):
         df.to_feather(output)
     elif suffix == ".csv":
         df.to_csv(output, index=False)
@@ -45,7 +45,7 @@ def save_dataframe(df: pd.DataFrame, output: pathlib.Path) -> None:
             ) from e
     else:
         raise click.BadParameter(
-            f"Unsupported output extension '{suffix}'. Use .feather, .csv, or .xlsx",
+            f"Unsupported output extension '{suffix}'. Use .feather, .fth, .csv, or .xlsx",
             param_hint="'--output' / '-o'",
         )
     click.echo(f"Saved results to {output}")
@@ -54,7 +54,13 @@ def save_dataframe(df: pd.DataFrame, output: pathlib.Path) -> None:
 @click.command()
 @click.option("--smiles", "-s", type=str, required=True)
 @click.option("--output", "-o", type=click.Path(exists=False, path_type=pathlib.Path), default=None)
-@click.option("--model_path", "-m", type=str, required=True)
+@click.option(
+    "--model_path",
+    "-m",
+    type=str,
+    default="checkpoints/nv-reasyn-ar-166m-v2.ckpt,checkpoints/nv-reasyn-eb-174m-v2.ckpt",
+    show_default=True,
+)
 @click.option("--search_width", type=int, default=2)
 @click.option("--exhaustiveness", type=int, default=4)
 @click.option("--time_limit", type=int, default=1000)

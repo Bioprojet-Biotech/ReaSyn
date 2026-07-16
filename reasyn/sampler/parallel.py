@@ -420,7 +420,8 @@ def run_sampling_one(
                     num_cycles=num_cycles,
                     max_evolve_steps=max_evolve_steps,
                     num_editflow_samples=num_editflow_samples,
-                    num_editflow_steps=num_editflow_steps)
+                    num_editflow_steps=num_editflow_steps,
+                    progress=True)
     t_elapsed = time.time() - t_start
     df = sampler.get_dataframe()[: max_results]
     df['model'] = _model_column(model_path)

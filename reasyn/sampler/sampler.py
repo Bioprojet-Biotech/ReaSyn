@@ -22,6 +22,7 @@ import pandas as pd
 import torch
 import torch.nn.functional as F
 import numpy as np
+from tqdm.auto import tqdm
 
 from reasyn.chem.fpindex import FingerprintIndex
 from reasyn.chem.matrix import ReactantReactionMatrix
@@ -118,8 +119,11 @@ class Sampler:
         num_cycles: int = 1,
         num_editflow_samples: int = 10,
         num_editflow_steps: int = 100,
+        progress: bool = False,
     ) -> None:
-        for i in range(num_cycles * 3):
+        phase_names = {0: "bu", 1: "td", 2: "ef"}
+        pbar = tqdm(range(num_cycles * 3), total=num_cycles * 3, desc="evolve", disable=not progress)
+        for i in pbar:
             if time_limit is not None and time_limit.exceeded():
                 break
 
@@ -127,6 +131,9 @@ class Sampler:
                 max_sim = max([state.score for state in self._finished] or [-1])
                 if max_sim == 1.0:
                     break
+
+            best = max([state.score for state in self._finished] or [None])
+            pbar.set_postfix(phase=phase_names[i % 3], best=f"{best:.3f}" if best is not None else "-")
 
             self._finished.sort(key=lambda s: s.score, reverse=True)
             
@@ -160,7 +167,9 @@ class Sampler:
                             break
             
             self._finished.sort(key=lambda s: s.score, reverse=True)
-            
+            best = max([state.score for state in self._finished] or [None])
+            pbar.set_postfix(phase=phase_names[i % 3], best=f"{best:.3f}" if best is not None else "-")
+
     @torch.no_grad()
     def _predict_ar(
         self,
