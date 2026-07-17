@@ -19,6 +19,7 @@ import pathlib
 import click
 from reasyn.sampler.parallel import run_parallel_sampling
 from reasyn.chem.mol import Molecule, read_mol_file
+from reasyn.report import write_report_from_arg
 
 
 def _input_mols_option(p):
@@ -44,6 +45,12 @@ def _input_mols_option(p):
 @click.option("--mols_to_filter", type=str, default=None)
 @click.option("--filter_sim", type=float, default=0.8)
 @click.option("--min_sim", type=float, default=0.0)
+@click.option(
+    "--report",
+    type=str,
+    default=None,
+    help='Optional PDF report: "all" or "top(n)" (e.g. top(1)).',
+)
 def main(
     input: list[Molecule],
     output: pathlib.Path,
@@ -63,6 +70,7 @@ def main(
     mols_to_filter: str,
     filter_sim: float,
     min_sim: float,
+    report: str | None,
 ):
     model_path = [pathlib.Path(path) for path in model_path.split(',')]
     assert all([path.exists() for path in model_path])
@@ -88,6 +96,13 @@ def main(
         filter_sim=filter_sim,
         min_sim=min_sim,
     )
+    try:
+        written = write_report_from_arg(output, report)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
+    if written is not None:
+        path, n_routes = written
+        click.echo(f"Wrote {path} ({n_routes} route(s))")
 
 
 if __name__ == "__main__":

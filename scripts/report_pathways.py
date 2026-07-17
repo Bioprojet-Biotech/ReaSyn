@@ -20,14 +20,7 @@ from pathlib import Path
 
 import click
 
-from reasyn.report import (
-    DrawOptions,
-    build_routes,
-    load_results_table,
-    load_rxn_matrix,
-    select_routes,
-    write_pdf,
-)
+from reasyn.report import generate_pathways_report
 
 
 def _parse_indices(value: str | None) -> list[int] | None:
@@ -44,7 +37,7 @@ def _parse_indices(value: str | None) -> list[int] | None:
 
 @click.command()
 @click.argument("results", type=click.Path(exists=True, path_type=Path))
-@click.option("--output", "-o", type=click.Path(path_type=Path), required=True)
+@click.option("--output", "-o", type=click.Path(path_type=Path), default=None)
 @click.option(
     "--matrix-path",
     type=click.Path(exists=True, path_type=Path),
@@ -64,7 +57,7 @@ def _parse_indices(value: str | None) -> list[int] | None:
 @click.option("--max-panel-height", type=int, default=520, show_default=True)
 def main(
     results: Path,
-    output: Path,
+    output: Path | None,
     matrix_path: Path,
     indices: str | None,
     top_k: int,
@@ -75,33 +68,23 @@ def main(
     max_panel_height: int,
 ) -> None:
     """Build a Reaxys-style PDF report (overview + one page per step) from sampling results."""
-    if output.suffix.lower() != ".pdf":
-        raise click.ClickException("Output must be a .pdf file")
-
     try:
-        df = load_results_table(results)
-    except ValueError as exc:
-        raise click.ClickException(str(exc)) from exc
-
-    idx = _parse_indices(indices)
-    try:
-        selected = select_routes(
-            df,
-            indices=idx,
-            top_k=None if all_routes else top_k,
+        path, n_routes = generate_pathways_report(
+            results,
+            output=output,
+            all_routes=all_routes,
+            top_k=top_k,
+            matrix_path=matrix_path,
+            indices=_parse_indices(indices),
             min_score=min_score,
+            width=width,
+            panel_height=panel_height,
+            max_panel_height=max_panel_height,
         )
-    except (IndexError, ValueError) as exc:
+    except (ValueError, IndexError) as exc:
         raise click.ClickException(str(exc)) from exc
 
-    if selected.empty:
-        raise click.ClickException("No routes selected for the report")
-
-    opts = DrawOptions(width=width, panel_height=panel_height, max_panel_height=max_panel_height)
-    rxn_matrix = load_rxn_matrix(matrix_path)
-    routes = build_routes(selected, rxn_matrix, opts)
-    path = write_pdf(routes, output)
-    click.echo(f"Wrote {path} ({len(routes)} route(s))")
+    click.echo(f"Wrote {path} ({n_routes} route(s))")
 
 
 if __name__ == "__main__":

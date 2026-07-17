@@ -16,6 +16,7 @@
 """Pathway reporting: parse sampling tables into HTML/PNG or PDF documents."""
 
 from reasyn.report.document import build_route, build_routes
+from reasyn.report.generate import generate_pathways_report, parse_report_arg, write_report_from_arg
 from reasyn.report.html import write_html_report
 from reasyn.report.io import load_results_table
 from reasyn.report.pdf import write_pdf
@@ -30,10 +31,13 @@ __all__ = [
     "StepPage",
     "build_route",
     "build_routes",
+    "generate_pathways_report",
     "load_results_table",
     "load_rxn_matrix",
+    "parse_report_arg",
     "pathway_to_steps",
     "select_routes",
     "write_html_report",
     "write_pdf",
+    "write_report_from_arg",
 ]

@@ -22,6 +22,7 @@ import click
 import pandas as pd
 
 from reasyn.chem.mol import Molecule, read_mol_file
+from reasyn.report import write_report_from_arg
 from reasyn.sampler.parallel import run_sampling_one
 
 
@@ -71,6 +72,12 @@ def save_dataframe(df: pd.DataFrame, output: pathlib.Path) -> None:
 @click.option("--mols_to_filter", type=str, default=None)
 @click.option("--filter_sim", type=float, default=0.8)
 @click.option("--min_sim", type=float, default=0.0)
+@click.option(
+    "--report",
+    type=str,
+    default=None,
+    help='Optional PDF report: "all" or "top(n)" (e.g. top(1)).',
+)
 def main(
     smiles: str,
     output: pathlib.Path | None,
@@ -85,10 +92,16 @@ def main(
     mols_to_filter: str | None,
     filter_sim: float,
     min_sim: float,
+    report: str | None,
 ):
+    if report is not None and output is None:
+        raise click.UsageError("--report requires --output / -o so results can be saved first")
+
+    print("Initializing model...")
     model_paths = [pathlib.Path(path) for path in model_path.split(",")]
     assert all(path.exists() for path in model_paths)
 
+    print("Running sampling...")
     t_start = time()
     df = run_sampling_one(
         input=Molecule(smiles),
@@ -104,11 +117,21 @@ def main(
         filter_sim=filter_sim,
         min_sim=min_sim,
     )
+    print("Sampling complete.")
     print(df)
     print(f"{time() - t_start:.2f} sec elapsed")
-
+    print("Saving results...")
     if output is not None:
         save_dataframe(df, output)
+        print("Generating report...")
+        try:
+            written = write_report_from_arg(output, report)
+        except ValueError as exc:
+            raise click.ClickException(str(exc)) from exc
+        if written is not None:
+            path, n_routes = written
+            click.echo(f"Wrote {path} ({n_routes} route(s))")
+    print("Done.")
 
 
 if __name__ == "__main__":
